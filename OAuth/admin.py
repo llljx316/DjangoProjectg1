@@ -11,8 +11,8 @@ class newuserAdmin(UserAdmin):
         (_('Permissions'), {'fields': ('is_staff', 'is_superuser','user_permissions','roles')}),
     )
 
-    list_display = ('UserID','username','roles','email','is_active')
-    list_display_links = ('UserID','username','roles','is_active')
+    list_display = ('id','username','roles','email','is_active')
+    list_display_links = ('id','username','roles','is_active')
     search_fields = ('username', 'email')
 
 admin.site.register(newuser, newuserAdmin)
