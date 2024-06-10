@@ -27,6 +27,20 @@ class Regulatory(Organization):
 class AnalysisOrganization(Organization):
     AnalysisID = models.AutoField('分析机构ID',primary_key=True)
 
+class Ship(models.Model):
+    shipid = models.AutoField(primary_key=True)  # 船只ID
+    name = models.CharField(max_length=100)  # 船只名称
+    ship_type = models.CharField(max_length=50)  # 船只类型
+    capacity = models.FloatField()  # 船只载重量
+    length = models.FloatField()  # 船只长度
+    width = models.FloatField()  # 船只宽度
+    height = models.FloatField()  # 船只高度
+    draft = models.FloatField()  # 船只吃水
+    status = models.CharField(max_length=50)  # 船只状态
+    country = models.CharField(max_length=50)  # 船只所属国家
+
+    # def __str__(self):
+    #     return self.name
 
 
 class newuser(AbstractUser):
@@ -34,6 +48,15 @@ class newuser(AbstractUser):
         [0, 'admin'],
         [1, 'user'],
     ]
+
+    USER_TYPE_CHOICES = (
+        (1, 'admin'),
+        (2, 'shipcrew'),
+        (3, 'analyst'),
+        (4, 'supervisor')
+    )
+
+    typevalue = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES)
 
     is_type1 = models.BooleanField(default=False)
 
@@ -53,6 +76,12 @@ class newuser(AbstractUser):
         swappable = 'AUTH_USER_MODEL'
         pass
 
-# class UserPortAdmin(models.Model):
-#     user = models.OneToOneField(newuser, on_delete=models.CASCADE, primary_key=True)
-#
+
+
+class DataAnalyst(models.Model):
+    user = models.OneToOneField(newuser, on_delete=models.CASCADE, primary_key=True)
+    AppointerID = models.ForeignKey(AnalysisOrganization, on_delete=models.SET_NULL, null=True)
+
+class ShipCrew(models.Model):
+    user = models.OneToOneField(newuser, on_delete=models.CASCADE, primary_key=True)
+    ShipID = models.ForeignKey(Ship, on_delete=models.SET_NULL, null=True)

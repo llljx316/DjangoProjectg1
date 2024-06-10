@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
-from OAuth.models import newuser
+from OAuth.models import (newuser, Ship, ShipCrew)
 from rest_framework.response import Response
 # Create your views here.
-from OAuth.serializers import UserSerializer
+from OAuth.serializers import *
+from django.db.models import Q
 
 
 #只返回成功，留出接口
@@ -33,9 +34,93 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     http_method_names = ['get']
 
+    """
+        List a queryset.
+        """
+
+    def list(self, request, *args, **kwargs):
+        if request.user.roles == 0:
+            self.queryset = self.queryset.filter(~Q(username='admin'))
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 class UserCreateViewSet(viewsets.ModelViewSet):
     queryset = newuser.objects.all()
     serializer_class = UserSerializer
+    http_method_names = ['post']
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # if  newuser.objects.filter(email=request.data['email']).exists():
+        #     return Response({'detail': '邮箱重复'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_info = self.perform_create(serializer)
+        user_info.set_password(request.data['password'])
+        headers = self.get_success_headers(serializer.data)
+        user_info.save()
+
+        try:
+            #如果船员
+            if int(request.data['typevalue']) == 2:
+                # 创建ship
+                    ship = Ship.objects.get(shipid=request.data['ShipID'])  # 获取对应的Ship对象
+                    ShipCrew.objects.create(user=user_info, ShipID=ship)
+        except:
+            user_info.delete()
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+class UserDeleteViewSet(viewsets.ModelViewSet):
+    queryset = newuser.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['delete']
+    # permission_classes = [] #后面再改
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     user_info = self.perform_create(serializer)
+    #     user_info.set_password(request.data['password'])
+    #     headers = self.get_success_headers(serializer.data)
+    #     user_info.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    #
+    # def perform_create(self, serializer):
+    #     return serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+class ShipCrewCreateViewSet(viewsets.ModelViewSet):
+    queryset = ShipCrew.objects.all()
+    serializer_class = ShipCrewSerializer
     http_method_names = ['post']
     permission_classes = []
 
@@ -48,3 +133,37 @@ class UserCreateViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+class ShipCrewCreateViewSet2(viewsets.ModelViewSet):
+    queryset = newuser.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['post']
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        #创建ship
+        try:
+            ship = Ship.objects.get(shipid=request.data['ShipID'])  # 获取对应的Ship对象
+            ShipCrew.objects.create(user=user, ShipID=ship)
+        except:
+            user.delete()
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+class ShipIDandNameViewSet(viewsets.ModelViewSet):
+    queryset = Ship.objects.all()
+    serializer_class = ShipSerializer
+    http_method_names = ['get']
+    permission_classes = []
+
+class ShipIDandNameAuthorViewSet(viewsets.ModelViewSet):
+    queryset = Ship.objects.all()
+    serializer_class = ShipSerializer
+    http_method_names = ['post','delete']

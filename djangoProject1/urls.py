@@ -20,13 +20,17 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from rest_framework import routers
-from OAuth.views import UserInfoViewSet,UserViewSet,UserCreateViewSet,SuccessView
+from OAuth.views import *
 
 router_V1 = routers.DefaultRouter()
 router_V1.register('info', UserInfoViewSet, basename="user-info")
 router_V1.register('users/create', UserCreateViewSet, basename='user-create') #注意顺序
+router_V1.register('users/delete', UserDeleteViewSet, basename='user-delete')
 router_V1.register('users', UserViewSet)
-
+router_V1.register('ships/author', ShipIDandNameAuthorViewSet, basename='ship-author')
+router_V1.register('ships', ShipIDandNameViewSet, basename='ship')
+router_V1.register('shipcrew/create', ShipCrewCreateViewSet, basename='shipcrew-create')
+router_V1.register('shipcrew2/create', ShipCrewCreateViewSet2, basename='shipcrew-create2')
 
 
 urlpatterns = [
