@@ -44,10 +44,14 @@ class Ship(models.Model):
 
 
 class newuser(AbstractUser):
-    role_type=[
-        [0, 'admin'],
-        [1, 'user'],
-    ]
+    # role_type=[
+    #     [0, 'admin'],
+    #     [1, 'user'],
+    # ]
+    role_type = (
+        (0, 'admin'),
+        (1, 'user'),
+    )
 
     USER_TYPE_CHOICES = (
         (1, 'admin'),
@@ -60,7 +64,7 @@ class newuser(AbstractUser):
 
     is_type1 = models.BooleanField(default=False)
 
-    roles = models.IntegerField(verbose_name='角色',choices=role_type,default=1)
+    roles = models.PositiveSmallIntegerField(verbose_name='角色',choices=role_type,default=1)
     id = models.AutoField('用户ID', primary_key=True)
     # Name = models.CharField('用户名字', max_length=30)
     # # Password = models.CharField('密码', max_length=30)

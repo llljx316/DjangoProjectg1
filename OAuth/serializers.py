@@ -6,7 +6,7 @@ from rest_framework import routers, serializers, viewsets
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = newuser
-        fields = ['url', 'username', 'email', 'is_staff', 'id', 'typevalue']
+        fields = ['url', 'username', 'email', 'is_staff', 'id', 'typevalue', 'roles']
 
 class ShipSerializer(serializers.ModelSerializer):
     class Meta:
