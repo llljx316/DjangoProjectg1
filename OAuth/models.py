@@ -29,7 +29,7 @@ class AnalysisOrganization(Organization):
 
 class Ship(models.Model):
     shipid = models.AutoField(primary_key=True)  # 船只ID
-    name = models.CharField(max_length=100)  # 船只名称
+    name = models.CharField(max_length=100, db_index=True)  # 船只名称
     ship_type = models.CharField(max_length=50)  # 船只类型
     capacity = models.FloatField()  # 船只载重量
     length = models.FloatField()  # 船只长度

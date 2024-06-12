@@ -5,6 +5,7 @@ from rest_framework.response import Response
 # Create your views here.
 from OAuth.serializers import *
 from django.db.models import Q
+from rest_framework import filters
 
 
 #只返回成功，留出接口
@@ -33,6 +34,8 @@ class  UserViewSet(viewsets.ModelViewSet):
     queryset = newuser.objects.all()
     serializer_class = UserSerializer
     http_method_names = ['get','put']
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email']
 
     """
         List a queryset.
@@ -193,4 +196,6 @@ class ShipIDandNameViewSet(viewsets.ModelViewSet):
 class ShipIDandNameAuthorViewSet(viewsets.ModelViewSet):
     queryset = Ship.objects.all()
     serializer_class = ShipSerializer
-    http_method_names = ['post','delete']
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    http_method_names = ['post','delete','put', 'patch','get']
